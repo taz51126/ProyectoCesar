@@ -1,0 +1,9 @@
+{
+  "appId": "com.migastos.agendaapp",
+  "appName": "Mi Control de Gastos",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  }
+}

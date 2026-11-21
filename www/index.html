@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Mi Control de Gastos</title>
+  <style>
+    :root {
+      --primary: #5b54f5;
+      --primary-dark: #4338ca;
+      --secondary: #7cc4fa;
+      --bg: #f3f5fb;
+      --card: #ffffff;
+      --text: #1e293b;
+      --muted: #64748b;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --radius: 18px;
+      --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .screen {
+      display: none;
+      min-height: 100vh;
+      width: 100%;
+    }
+
+    .screen.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ================= PANTALLAS DE PRESENTACIÓN (ONBOARDING) ================= */
+    .onboarding-screen {
+      background: #0f172a;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 16px 28px;
+      position: relative;
+    }
+
+    .onboarding-img-wrap {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border-radius: 24px;
+      margin-bottom: 16px;
+    }
+
+    .onboarding-img-wrap img {
+      max-width: 100%;
+      max-height: 76vh;
+      object-fit: contain;
+      border-radius: 22px;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.45);
+    }
+
+    .onboarding-footer {
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      transition: all 0.3s;
+    }
+
+    .dot.active {
+      width: 26px;
+      border-radius: 999px;
+      background: #7cc4fa;
+    }
+
+    .btn-onboarding {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 16px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      background: linear-gradient(135deg, #6366f1, #3b82f6);
+      color: #fff;
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+      transition: transform 0.15s;
+    }
+
+    .btn-onboarding:active {
+      transform: scale(0.98);
+    }
+
+    /* ================= PANTALLA DE REGISTRO / LOGIN ================= */
+    .auth-screen {
+      background: linear-gradient(160deg, #5b54f5 0%, #3b82f6 55%, #7cc4fa 100%);
+      justify-content: center;
+      align-items: center;
+      padding: 24px 18px;
+    }
+
+    .auth-card {
+      background: #ffffff;
+      width: 100%;
+      max-width: 400px;
+      border-radius: 26px;
+      padding: 28px 22px;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.22);
+      animation: fadeUp 0.35s ease;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .auth-badge {
+      display: inline-block;
+      background: #eef2ff;
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 0.8rem;
+      padding: 6px 12px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+
+    .auth-card h1 {
+      font-size: 1.55rem;
+      margin-bottom: 6px;
+      color: #0f172a;
+    }
+
+    .auth-card p {
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin-bottom: 20px;
+      line-height: 1.4;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #334155;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 13px 14px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 14px;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+      background: #f8fafc;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary);
+      background: #ffffff;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 14px;
+      background: var(--primary);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 6px;
+      box-shadow: 0 6px 18px rgba(91, 84, 245, 0.3);
+    }
+
+    .btn-primary:active {
+      background: var(--primary-dark);
+    }
+
+    .auth-error {
+      color: var(--danger);
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-top: 10px;
+      text-align: center;
+      min-height: 20px;
+    }
+
+    .link-btn {
+      background: none;
+      border: none;
+      color: var(--primary);
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-top: 14px;
+      width: 100%;
+      text-align: center;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    /* ================= APLICACIÓN PRINCIPAL (DASHBOARD) ================= */
+    .app-header {
+      background: linear-gradient(135deg, #5b54f5, #3b82f6);
+      color: #fff;
+      padding: 22px 18px 26px;
+      border-bottom-left-radius: 28px;
+      border-bottom-right-radius: 28px;
+      box-shadow: 0 10px 25px rgba(91, 84, 245, 0.25);
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .user-greeting {
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+
+    .user-name {
+      font-size: 1.25rem;
+      font-weight: 800;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .balance-box {
+      background: rgba(255,255,255,0.16);
+      backdrop-filter: blur(8px);
+      border-radius: 20px;
+      padding: 16px;
+      border: 1px solid rgba(255,255,255,0.25);
+    }
+
+    .balance-label {
+      font-size: 0.85rem;
+      opacity: 0.92;
+    }
+
+    .balance-amount {
+      font-size: 2rem;
+      font-weight: 800;
+      margin: 4px 0 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .stat-pill {
+      background: rgba(15, 23, 42, 0.22);
+      padding: 10px 12px;
+      border-radius: 14px;
+    }
+
+    .stat-pill span {
+      display: block;
+      font-size: 0.75rem;
+      opacity: 0.88;
+    }
+
+    .stat-pill strong {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .container {
+      padding: 16px;
+      max-width: 540px;
+      margin: 0 auto;
+      width: 100%;
+      padding-bottom: 90px;
+    }
+
+    /* Botones rápidos */
+    .quick-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .action-card-btn {
+      border: none;
+      border-radius: 18px;
+      padding: 15px 12px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: transform 0.15s;
+    }
+
+    .action-card-btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-income {
+      background: #ecfdf5;
+      color: #047857;
+      border: 1.5px solid #a7f3d0;
+    }
+
+    .btn-expense {
+      background: #fef2f2;
+      color: #b91c1c;
+      border: 1.5px solid #fecaca;
+    }
+
+    /* Tarjetas generales */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Barra de progreso de presupuesto */
+    .progress-bar-bg {
+      width: 100%;
+      height: 12px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 8px 0;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--success);
+      width: 0%;
+      transition: width 0.4s ease, background 0.3s ease;
+    }
+
+    /* Filtros de categoría */
+    .filter-chips {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+      scrollbar-width: none;
+    }
+
+    .filter-chips::-webkit-scrollbar {
+      display: none;
+    }
+
+    .chip {
+      padding: 7px 14px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      color: #334155;
+      font-size: 0.82rem;
+      font-weight: 600;
+      border: none;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .chip.active {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    /* Lista de movimientos */
+    .tx-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .tx-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f8fafc;
+      padding: 12px;
+      border-radius: 15px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .tx-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .tx-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      background: #eef2ff;
+    }
+
+    .tx-info h4 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .tx-info small {
+      color: var(--muted);
+      font-size: 0.78rem;
+      display: block;
+    }
+
+    .tx-right {
+      text-align: right;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tx-amount {
+      font-weight: 800;
+      font-size: 0.98rem;
+    }
+
+    .tx-amount.income { color: var(--success); }
+    .tx-amount.expense { color: var(--danger); }
+
+    .btn-del {
+      background: #fee2e2;
+      color: #dc2626;
+      border: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 24px 12px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    /* Modales */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      z-index: 100;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-sheet {
+      background: #fff;
+      width: 100%;
+      max-width: 500px;
+      border-top-left-radius: 26px;
+      border-top-right-radius: 26px;
+      padding: 22px 20px 28px;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: slideUp 0.25s ease;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .modal-header h3 {
+      font-size: 1.2rem;
+    }
+
+    .close-modal {
+      background: #f1f5f9;
+      border: none;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .cat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .cat-btn {
+      border: 1.5px solid #e2e8f0;
+      background: #f8fafc;
+      border-radius: 14px;
+      padding: 10px 6px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #334155;
+      transition: all 0.15s;
+    }
+
+    .cat-btn.selected {
+      border-color: var(--primary);
+      background: #eef2ff;
+      color: var(--primary);
+    }
+
+    .cat-btn span {
+      display: block;
+      font-size: 1.35rem;
+      margin-bottom: 3px;
+    }
+
+    .custom-concept-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .btn-small {
+      padding: 0 14px;
+      border-radius: 12px;
+      border: none;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ================= 1. PRESENTACIÓN SLIDE 1 ================= -->
+  <section id="screen-intro-1" class="screen onboarding-screen">
+    <div class="onboarding-img-wrap">
+      <img src="assets/inicio.jpeg" alt="Presentación 1" />
+    </div>
+    <div class="onboarding-footer">
+      <div class="dots">
+        <div class="dot active"></div>
+        <div class="dot"></div>
+      </div>
+      <button class="btn-onboarding" onclick="goScreen('screen-intro-2')">Siguiente ➜</button>
+    </div>
+  </section>
+
+  <!-- ================= 2. PRESENTACIÓN SLIDE 2 ================= -->
+  <section id="screen-intro-2" class="screen onboarding-screen">
+    <div class="onboarding-img-wrap">
+      <img src="assets/seg.jpeg" alt="Presentación 2" />
+    </div>
+    <div class="onboarding-footer">
+      <div class="dots">
+        <div class="dot"></div>
+        <div class="dot active"></div>
+      </div>
+      <button class="btn-onboarding" onclick="finishIntro()">¡Comenzar ahora! 🚀</button>
+    </div>
+  </section>
+
+  <!-- ================= 3. REGISTRO / INICIO DE SESIÓN PRIVADO ================= -->
+  <section id="screen-auth" class="screen auth-screen">
+    <div class="auth-card">
+      <span class="auth-badge">🔒 Privacidad 100% Local</span>
+      <h1 id="auth-title">Crea tu cuenta</h1>
+      <p id="auth-subtitle">Registra tu usuario y contraseña para proteger tus finanzas. Solo tú podrás ver tus datos en este teléfono.</p>
+
+      <form id="auth-form" onsubmit="handleAuth(event)">
+        <div class="form-group">
+          <label for="auth-user">Usuario</label>
+          <input type="text" id="auth-user" class="form-control" placeholder="Ej. Carlos2026" required autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <label for="auth-pass">Contraseña</label>
+          <input type="password" id="auth-pass" class="form-control" placeholder="••••••" required />
+        </div>
+        <button type="submit" class="btn-primary" id="auth-submit-btn">Registrarme y Entrar</button>
+        <div class="auth-error" id="auth-error"></div>
+      </form>
+
+      <button class="link-btn" onclick="goScreen('screen-intro-1')">Ver presentación de nuevo</button>
+    </div>
+  </section>
+
+  <!-- ================= 4. PANEL PRINCIPAL DE CONTROL DE GASTOS ================= -->
+  <section id="screen-app" class="screen">
+    <header class="app-header">
+      <div class="header-top">
+        <div>
+          <div class="user-greeting">Hola de nuevo,</div>
+          <div class="user-name" id="display-username">Usuario</div>
+        </div>
+        <div class="header-actions">
+          <button class="icon-btn" onclick="goScreen('screen-intro-1')">ℹ️ Intro</button>
+          <button class="icon-btn" onclick="logout()">🔒 Salir</button>
+        </div>
+      </div>
+
+      <div class="balance-box">
+        <div class="balance-label">Saldo Disponible</div>
+        <div class="balance-amount" id="total-balance">$0.00</div>
+        <div class="stats-row">
+          <div class="stat-pill">
+            <span>💵 Salario / Ingresos</span>
+            <strong id="total-income">$0.00</strong>
+          </div>
+          <div class="stat-pill">
+            <span>💸 Total Gastado</span>
+            <strong id="total-expense">$0.00</strong>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="container">
+      <!-- Botones de acción -->
+      <div class="quick-actions">
+        <button class="action-card-btn btn-income" onclick="openModal('income')">
+          ➕ Registrar Salario / Ganancia
+        </button>
+        <button class="action-card-btn btn-expense" onclick="openModal('expense')">
+          ➖ Añadir Gasto
+        </button>
+      </div>
+
+      <!-- Barra de salud financiera -->
+      <div class="card">
+        <div class="card-title">
+          <span>📊 Uso de tu salario</span>
+          <span id="usage-percent">0%</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="usage-bar"></div>
+        </div>
+        <small style="color: var(--muted);" id="usage-tip">Registra tu salario para calcular tu margen disponible.</small>
+      </div>
+
+      <!-- Resumen por categorías -->
+      <div class="card">
+        <div class="card-title">
+          <span>🧾 Historial de Movimientos</span>
+          <span style="font-size:0.8rem; color:var(--muted);" id="tx-count">0 registros</span>
+        </div>
+
+        <div class="filter-chips" id="filter-chips"></div>
+
+        <div class="tx-list" id="tx-list">
+          <div class="empty-state">Aún no hay movimientos registrados. ¡Empieza añadiendo tu salario o un gasto!</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= MODAL PARA AGREGAR INGRESO O GASTO ================= -->
+  <div class="modal-backdrop" id="tx-modal">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3 id="modal-title">Nuevo Registro</h3>
+        <button class="close-modal" onclick="closeModal()">✕</button>
+      </div>
+
+      <form onsubmit="saveTransaction(event)">
+        <div id="expense-categories-section">
+          <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:8px; color:#334155;">
+            Selecciona un concepto de gasto:
+          </label>
+          <div class="cat-grid" id="cat-grid"></div>
+
+          <div class="form-group">
+            <label>¿No está en la lista? Añade un nuevo concepto:</label>
+            <div class="custom-concept-row">
+              <input type="text" id="new-concept-input" class="form-control" placeholder="Ej. Gimnasio, Mascotas, Internet..." />
+              <button type="button" class="btn-small" onclick="addCustomCategory()">+ Crear</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="tx-amount">Monto ($)</label>
+          <input type="number" step="0.01" min="0.01" id="tx-amount" class="form-control" placeholder="0.00" required />
+        </div>
+
+        <div class="form-group">
+          <label for="tx-note" id="note-label">Descripción o detalle</label>
+          <input type="text" id="tx-note" class="form-control" placeholder="Ej. Quincena, Comida corrida, Recibo CFE..." required />
+        </div>
+
+        <div class="form-group">
+          <label for="tx-date">Fecha</label>
+          <input type="date" id="tx-date" class="form-control" required />
+        </div>
+
+        <button type="submit" class="btn-primary" id="save-tx-btn">Guardar Movimiento</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ================= DATOS INICIALES Y CATEGORÍAS =================
+    const DEFAULT_CATEGORIES = [
+      { id: 'comidas', name: 'Comidas', icon: '🍔' },
+      { id: 'pasajes', name: 'Pasajes / Transporte', icon: '🚌' },
+      { id: 'colegiatura', name: 'Colegiatura escolar', icon: '🎓' },
+      { id: 'renta', name: 'Renta', icon: '🏠' },
+      { id: 'hijos', name: 'Gastos de hijos', icon: '🧸' },
+      { id: 'agua', name: 'Agua', icon: '💧' },
+      { id: 'luz', name: 'Luz', icon: '💡' },
+      { id: 'salud', name: 'Salud / Farmacia', icon: '💊' },
+      { id: 'otros', name: 'Otros gastos', icon: '🛍️' }
+    ];
+
+    let currentModalType = 'expense';
+    let selectedCategory = DEFAULT_CATEGORIES[0];
+    let currentFilter = 'ALL';
+
+    // Storage helpers
+    function getAccount() {
+      const raw = localStorage.getItem('mcg_account');
+      return raw ? JSON.parse(raw) : null;
+    }
+
+    function getCategories() {
+      const raw = localStorage.getItem('mcg_categories');
+      if (raw) return JSON.parse(raw);
+      localStorage.setItem('mcg_categories', JSON.stringify(DEFAULT_CATEGORIES));
+      return DEFAULT_CATEGORIES;
+    }
+
+    function getTransactions() {
+      const raw = localStorage.getItem('mcg_transactions');
+      return raw ? JSON.parse(raw) : [];
+    }
+
+    function saveTransactions(list) {
+      localStorage.setItem('mcg_transactions', JSON.stringify(list));
+    }
+
+    // Navegación entre pantallas
+    function goScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      window.scrollTo(0, 0);
+    }
+
+    function finishIntro() {
+      localStorage.setItem('mcg_intro_seen', '1');
+      setupAuthScreen();
+      goScreen('screen-auth');
+    }
+
+    // ================= AUTENTICACIÓN =================
+    function setupAuthScreen() {
+      const acc = getAccount();
+      const title = document.getElementById('auth-title');
+      const sub = document.getElementById('auth-subtitle');
+      const btn = document.getElementById('auth-submit-btn');
+      document.getElementById('auth-error').textContent = '';
+
+      if (!acc) {
+        title.textContent = 'Crea tu cuenta privada';
+        sub.textContent = 'Define tu usuario y contraseña por única vez. Toda tu información queda protegida en este dispositivo.';
+        btn.textContent = 'Registrarme y Entrar';
+      } else {
+        title.textContent = 'Iniciar Sesión';
+        sub.textContent = 'Ingresa tu usuario y contraseña para acceder a tu control de gastos.';
+        btn.textContent = 'Desbloquear mi cuenta';
+      }
+    }
+
+    function handleAuth(e) {
+      e.preventDefault();
+      const user = document.getElementById('auth-user').value.trim();
+      const pass = document.getElementById('auth-pass').value;
+      const errEl = document.getElementById('auth-error');
+      const acc = getAccount();
+
+      if (!user || !pass) {
+        errEl.textContent = 'Por favor completa ambos campos.';
+        return;
+      }
+
+      if (!acc) {
+        // Primer registro
+        localStorage.setItem('mcg_account', JSON.stringify({ user, pass }));
+        enterApp(user);
+      } else {
+        // Validación de acceso
+        if (acc.user.toLowerCase() === user.toLowerCase() && acc.pass === pass) {
+          enterApp(acc.user);
+        } else {
+          errEl.textContent = '❌ Usuario o contraseña incorrectos.';
+        }
+      }
+    }
+
+    function enterApp(username) {
+      document.getElementById('auth-pass').value = '';
+      document.getElementById('display-username').textContent = username;
+      renderApp();
+      goScreen('screen-app');
+    }
+
+    function logout() {
+      setupAuthScreen();
+      goScreen('screen-auth');
+    }
+
+    // ================= MODAL Y CATEGORÍAS =================
+    function openModal(type) {
+      currentModalType = type;
+      const modal = document.getElementById('tx-modal');
+      const title = document.getElementById('modal-title');
+      const expSec = document.getElementById('expense-categories-section');
+      const noteLabel = document.getElementById('note-label');
+      const noteInput = document.getElementById('tx-note');
+      const saveBtn = document.getElementById('save-tx-btn');
+
+      document.getElementById('tx-amount').value = '';
+      document.getElementById('tx-note').value = '';
+      document.getElementById('tx-date').value = new Date().toISOString().split('T')[0];
+
+      if (type === 'income') {
+        title.textContent = '💵 Registrar Salario / Ganancia';
+        expSec.style.display = 'none';
+        noteLabel.textContent = 'Concepto del ingreso';
+        noteInput.placeholder = 'Ej. Salario quincenal, Bono, Venta extra...';
+        saveBtn.style.background = '#10b981';
+      } else {
+        title.textContent = '💸 Registrar Nuevo Gasto';
+        expSec.style.display = 'block';
+        noteLabel.textContent = 'Detalle del gasto';
+        noteInput.placeholder = 'Ej. Despensa semanal, Colegiatura mayo, Recibo luz...';
+        saveBtn.style.background = '#ef4444';
+        renderCategoryButtons();
+      }
+
+      modal.classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('tx-modal').classList.remove('open');
+    }
+
+    function renderCategoryButtons() {
+      const cats = getCategories();
+      if (!cats.some(c => c.id === selectedCategory.id)) {
+        selectedCategory = cats[0];
+      }
+      const grid = document.getElementById('cat-grid');
+      grid.innerHTML = cats.map(cat => `
+        <button type="button" class="cat-btn ${cat.id === selectedCategory.id ? 'selected' : ''}" onclick="selectCategory('${cat.id}')">
+          <span>${cat.icon}</span>
+          ${cat.name}
+        </button>
+      `).join('');
+    }
+
+    function selectCategory(id) {
+      const cats = getCategories();
+      selectedCategory = cats.find(c => c.id === id) || cats[0];
+      renderCategoryButtons();
+    }
+
+    function addCustomCategory() {
+      const input = document.getElementById('new-concept-input');
+      const name = input.value.trim();
+      if (!name) return;
+
+      const cats = getCategories();
+      const newCat = {
+        id: 'custom_' + Date.now(),
+        name: name,
+        icon: '📌'
+      };
+      cats.push(newCat);
+      localStorage.setItem('mcg_categories', JSON.stringify(cats));
+      selectedCategory = newCat;
+      input.value = '';
+      renderCategoryButtons();
+    }
+
+    function saveTransaction(e) {
+      e.preventDefault();
+      const amount = parseFloat(document.getElementById('tx-amount').value);
+      const note = document.getElementById('tx-note').value.trim();
+      const date = document.getElementById('tx-date').value;
+
+      if (isNaN(amount) || amount <= 0) return;
+
+      const tx = {
+        id: Date.now(),
+        type: currentModalType,
+        amount: amount,
+        note: note,
+        date: date,
+        categoryId: currentModalType === 'income' ? 'salario' : selectedCategory.id,
+        categoryName: currentModalType === 'income' ? 'Salario / Ganancia' : selectedCategory.name,
+        icon: currentModalType === 'income' ? '💵' : selectedCategory.icon
+      };
+
+      const list = getTransactions();
+      list.unshift(tx);
+      saveTransactions(list);
+      closeModal();
+      renderApp();
+    }
+
+    function deleteTransaction(id) {
+      const list = getTransactions().filter(t => t.id !== id);
+      saveTransactions(list);
+      renderApp();
+    }
+
+    // ================= RENDERIZADO DEL PANEL =================
+    function formatMoney(num) {
+      return '$' + num.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function renderApp() {
+      const list = getTransactions();
+      let income = 0;
+      let expense = 0;
+
+      list.forEach(t => {
+        if (t.type === 'income') income += t.amount;
+        else expense += t.amount;
+      });
+
+      const balance = income - expense;
+
+      document.getElementById('total-balance').textContent = formatMoney(balance);
+      document.getElementById('total-income').textContent = formatMoney(income);
+      document.getElementById('total-expense').textContent = formatMoney(expense);
+
+      // Barra de porcentaje gastado
+      let pct = 0;
+      if (income > 0) {
+        pct = Math.min(100, Math.round((expense / income) * 100));
+      } else if (expense > 0) {
+        pct = 100;
+      }
+
+      const bar = document.getElementById('usage-bar');
+      bar.style.width = pct + '%';
+      bar.style.background = pct < 65 ? '#10b981' : (pct < 90 ? '#f59e0b' : '#ef4444');
+      document.getElementById('usage-percent').textContent = pct + '%';
+
+      const tip = document.getElementById('usage-tip');
+      if (income === 0 && expense === 0) {
+        tip.textContent = 'Registra tu salario para calcular tu margen disponible.';
+      } else if (balance < 0) {
+        tip.textContent = '⚠️ Atención: tus gastos superan tus ingresos registrados.';
+      } else {
+        tip.textContent = `Te queda el ${100 - pct}% de tus ingresos disponibles.`;
+      }
+
+      // Chips de filtro
+      const cats = getCategories();
+      const chipsHtml = [
+        `<button class="chip ${currentFilter === 'ALL' ? 'active' : ''}" onclick="setFilter('ALL')">Todos</button>`,
+        `<button class="chip ${currentFilter === 'salario' ? 'active' : ''}" onclick="setFilter('salario')">💵 Ingresos</button>`,
+        ...cats.map(c => `<button class="chip ${currentFilter === c.id ? 'active' : ''}" onclick="setFilter('${c.id}')">${c.icon} ${c.name}</button>`)
+      ].join('');
+      document.getElementById('filter-chips').innerHTML = chipsHtml;
+
+      // Filtrar lista
+      const filtered = currentFilter === 'ALL' ? list : list.filter(t => t.categoryId === currentFilter);
+      document.getElementById('tx-count').textContent = `${filtered.length} registro(s)`;
+
+      const listEl = document.getElementById('tx-list');
+      if (filtered.length === 0) {
+        listEl.innerHTML = `<div class="empty-state">No hay movimientos en esta categoría.</div>`;
+        return;
+      }
+
+      listEl.innerHTML = filtered.map(t => `
+        <div class="tx-item">
+          <div class="tx-left">
+            <div class="tx-icon">${t.icon}</div>
+            <div class="tx-info">
+              <h4>${escapeHtml(t.note)}</h4>
+              <small>${escapeHtml(t.categoryName)} • ${t.date}</small>
+            </div>
+          </div>
+          <div class="tx-right">
+            <span class="tx-amount ${t.type}">${t.type === 'income' ? '+' : '-'}${formatMoney(t.amount)}</span>
+            <button class="btn-del" onclick="deleteTransaction(${t.id})" title="Eliminar">✕</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function setFilter(catId) {
+      currentFilter = catId;
+      renderApp();
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ================= ARRANQUE INICIAL =================
+    window.addEventListener('DOMContentLoaded', () => {
+      const introSeen = localStorage.getItem('mcg_intro_seen');
+      setupAuthScreen();
+      if (!introSeen) {
+        goScreen('screen-intro-1');
+      } else {
+        goScreen('screen-auth');
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "mi-control-gastos",
+  "version": "1.0.0",
+  "description": "App personal de control de gastos e ingresos",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo 'Static web assets ready'"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/cli": "^6.1.2",
+    "@capacitor/core": "^6.1.2"
+  }
+}
